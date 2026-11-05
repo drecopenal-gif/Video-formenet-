@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reel Video Generator</title>
+<style>
+:root{--bg:#0b0d12;--card:#151922;--line:#252b38;--tx:#eef1f6;--mut:#8b94a7;--ac:#3b9cff;--ac2:#7a5cff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+.wrap{max-width:960px;margin:0 auto}
+header{margin-bottom:18px}
+h1{font-size:24px;margin:0 0 4px;letter-spacing:-.3px}
+header p{margin:0;color:var(--mut);font-size:14px}
+.grid{display:grid;gap:18px}
+@media(min-width:820px){.grid{grid-template-columns:1fr 360px;align-items:start}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:18px}
+.step{display:grid;gap:10px}
+.step h2{font-size:15px;margin:0;display:flex;align-items:center;gap:10px}
+.step h2 span{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:grid;place-items:center;font-size:12px;font-weight:700}
+textarea{width:100%;min-height:92px;resize:vertical;background:#0e1118;color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px}
+textarea:focus{outline:2px solid var(--ac);outline-offset:1px}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:16px;text-align:center;cursor:pointer;display:grid;gap:8px;justify-items:center;color:var(--mut);font-size:14px;transition:.15s}
+.drop:hover,.drop.on{border-color:var(--ac);color:var(--tx)}
+.drop img{max-height:150px;max-width:100%;border-radius:10px;display:none}
+.drop b{color:var(--tx);font-size:15px}
+input[type=file]{display:none}
+.rng{display:grid;gap:6px;font-size:13px;color:var(--mut)}
+.rng div{display:flex;justify-content:space-between}
+.rng b{color:var(--ac);font-size:15px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+button{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;border:0;border-radius:14px;padding:16px;font-size:17px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55}
+.bar{height:6px;background:#0e1118;border-radius:6px;overflow:hidden;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--ac)}
+.pv{display:grid;justify-items:center;gap:10px}
+canvas{width:100%;max-width:320px;aspect-ratio:9/16;background:#000;border-radius:16px;border:1px solid var(--line)}
+#msg{font-size:13px;color:var(--mut);text-align:center;min-height:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Reel Video Generator</h1>
+    <p>Text lakho, image mukho, button dabavo. Video tayar.</p>
+  </header>
+  <div class="grid">
+    <div class="panel">
+      <div class="step">
+        <h2><span>1</span>Safed patti no text</h2>
+        <textarea id="ad" placeholder="Ahiya tamaro ad lakho">Agar chahiye to comment kar "LINK" 💀</textarea>
+      </div>
+      <div class="step">
+        <h2><span>2</span>Aakhi image (poster + time + size + reactions)</h2>
+        <label class="drop" id="drop">
+          <img id="thumb" alt="">
+          <b id="dropT">Image select karo</b>
+          <small id="dropS">Tap karo ya ahiya drag karo</small>
+          <input type="file" id="poster" accept="image/*">
+        </label>
+        <div class="rng">
+          <div><span>Image size</span><b id="scv">100%</b></div>
+          <input type="range" id="sc" min="50" max="130" value="100">
+        </div>
+      </div>
+      <div class="step">
+        <h2><span>3</span>Video length</h2>
+        <div class="rng">
+          <div><span>Seconds</span><b id="secv">7s</b></div>
+          <input type="range" id="sec" min="3" max="30" value="7">
+        </div>
+      </div>
+      <button id="gen">Generate &amp; Download</button>
+      <div class="bar" id="bar"><i id="fill"></i></div>
+    </div>
+    <div class="pv">
+      <canvas id="cv" width="1080" height="1920"></canvas>
+      <div id="msg">Live preview</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+const W=1080,H=1920;
+let poster=null,recording=false,t0=performance.now();
+const emojiCache={};
+
+function cp(ch){return Array.from(ch).map(c=>c.codePointAt(0).toString(16)).filter(h=>h!=='fe0f').join('-')}
+function loadEmoji(ch){
+  if(emojiCache[ch]!==undefined)return Promise.resolve(emojiCache[ch]);
+  return new Promise(res=>{
+    const im=new Image();im.crossOrigin='anonymous';
+    im.onload=()=>{emojiCache[ch]=im;res(im)};
+    im.onerror=()=>{emojiCache[ch]=null;res(null)};
+    im.src='https://cdn.jsdelivr.net/npm/emoji-datasource-apple@15.0.1/img/apple/64/'+cp(ch)+'.png';
+  });
+}
+const isEmoji=s=>/\p{Extended_Pictographic}/u.test(s);
+function tokens(str){
+  return window.Intl&&Intl.Segmenter?[...new Intl.Segmenter(undefined,{granularity:'grapheme'}).segment(str)].map(s=>s.segment):Array.from(str);
+}
+function preload(){return Promise.all(tokens($('ad').value).filter(isEmoji).map(loadEmoji))}
+function tw(k,fs){return isEmoji(k)?fs*1.08:ctx.measureText(k).width}
+const FONT=fs=>'800 '+fs+'px "Helvetica Neue",Arial,sans-serif';
+
+function wrapLines(text,fs,maxW){
+  ctx.font=FONT(fs);
+  const lines=[];
+  text.split('\n').forEach(par=>{
+    let line=[],w=0;
+    const words=par.split(' ');
+    words.forEach((word,i)=>{
+      const toks=tokens(word+(i<words.length-1?' ':''));
+      const ww=toks.reduce((a,k)=>a+tw(k,fs),0);
+      if(w+ww>maxW&&line.length){lines.push({toks:line,w});line=[];w=0}
+      line.push(...toks);w+=ww;
+    });
+    lines.push({toks:line,w});
+  });
+  return lines;
+}
+
+const BAND_Y=300,BAND_H=300;
+function drawBand(t){
+  ctx.fillStyle='#fff';ctx.fillRect(0,BAND_Y,W,BAND_H);
+  const text=$('ad').value||' ';
+  let fs=68,lines;
+  for(;fs>30;fs-=4){lines=wrapLines(text,fs,W-120);if(lines.length*fs*1.25<=BAND_H-50)break}
+  lines=wrapLines(text,fs,W-120);
+  const lh=fs*1.25;
+  let y=BAND_Y+(BAND_H-lines.length*lh)/2+fs*0.95;
+  const p=Math.min(1,Math.max(0,(t-0.15)/0.45));
+  const sc=0.92+0.08*(1-Math.pow(1-p,3));
+  ctx.save();
+  ctx.globalAlpha=p;
+  ctx.translate(W/2,BAND_Y+BAND_H/2);ctx.scale(sc,sc);ctx.translate(-W/2,-(BAND_Y+BAND_H/2));
+  ctx.textBaseline='alphabetic';ctx.textAlign='left';
+  lines.forEach(l=>{
+    let x=(W-l.w)/2;
+    ctx.font=FONT(fs);
+    l.toks.forEach(k=>{
+      if(isEmoji(k)){
+        const im=emojiCache[k],s=fs*1.08;
+        if(im)ctx.drawImage(im,x,y-s*0.82,s,s);
+        else{ctx.fillStyle='#000';ctx.font=fs*0.9+'px sans-serif';ctx.fillText(k,x,y);ctx.font=FONT(fs)}
+      }else{ctx.fillStyle='#000';ctx.fillText(k,x,y)}
+      x+=tw(k,fs);
+    });
+    y+=lh;
+  });
+  ctx.restore();
+}
+
+function drawImageBlock(t){
+  const top=BAND_Y+BAND_H+110;
+  const maxW=760*($('sc').value/100),maxH=1000*($('sc').value/100);
+  const k=Math.min(1,Math.max(0,(t-0.2)/0.7)),e=1-Math.pow(1-k,3);
+  if(!poster){
+    ctx.fillStyle='#161a22';ctx.beginPath();ctx.roundRect((W-maxW)/2,top,maxW,420,30);ctx.fill();
+    ctx.fillStyle='#8b94a7';ctx.font='600 40px sans-serif';ctx.textAlign='center';
+    ctx.fillText('Image upload karo',W/2,top+220);ctx.textAlign='left';
+    return;
+  }
+  let w=maxW,h=w*poster.height/poster.width;
+  if(h>maxH){h=maxH;w=h*poster.width/poster.height}
+  const x=(W-w)/2;
+  ctx.save();
+  ctx.globalAlpha=e;
+  const s=0.96+0.04*e;
+  ctx.translate(W/2,top+h/2);ctx.scale(s,s);ctx.translate(-W/2,-(top+h/2));
+  ctx.beginPath();ctx.roundRect(x,top,w,h,28);ctx.clip();
+  ctx.drawImage(poster,x,top,w,h);
+  ctx.restore();
+}
+
+function draw(t){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  drawBand(t);drawImageBlock(t);
+}
+function loop(){
+  if(!recording)draw(((performance.now()-t0)/1000)%(+$('sec').value+0.8));
+  requestAnimationFrame(loop);
+}
+
+/* UI */
+$('sec').oninput=()=>$('secv').textContent=$('sec').value+'s';
+$('sc').oninput=()=>$('scv').textContent=$('sc').value+'%';
+$('ad').addEventListener('input',preload);
+function setPoster(f){
+  if(!f||!f.type.startsWith('image/'))return;
+  const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{poster=im;t0=performance.now()};
+  im.src=url;
+  $('thumb').src=url;$('thumb').style.display='block';
+  $('dropT').textContent='Image select thai gayi';$('dropS').textContent='Badalva mate pachhi tap karo';
+}
+$('poster').onchange=e=>setPoster(e.target.files[0]);
+const drop=$('drop');
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('on')}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('on')}));
+drop.addEventListener('drop',e=>setPoster(e.dataTransfer.files[0]));
+
+$('gen').onclick=async()=>{
+  const btn=$('gen'),msg=$('msg'),secs=+$('sec').value;
+  if(!window.MediaRecorder||!cv.captureStream){msg.textContent='Aa browser ma video support nathi. Chrome ke Safari use karo.';return}
+  if(!poster){msg.textContent='Pehla image select karo.';return}
+  btn.disabled=true;msg.textContent='Taiyari chale chhe...';
+  await preload();
+  const types=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'];
+  const mime=types.find(t=>MediaRecorder.isTypeSupported(t))||'';
+  const ext=mime.includes('mp4')?'mp4':'webm';
+  const rec=new MediaRecorder(cv.captureStream(30),{mimeType:mime||undefined,videoBitsPerSecond:8000000});
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const done=new Promise(r=>rec.onstop=r);
+  recording=true;$('bar').style.display='block';
+  const start=performance.now();rec.start(250);
+  await new Promise(res=>{
+    (function f(){
+      const t=(performance.now()-start)/1000;
+      draw(t);
+      $('fill').style.width=Math.min(100,t/secs*100)+'%';
+      msg.textContent='Video bani rahyo chhe... '+Math.min(secs,Math.ceil(t))+'/'+secs+'s';
+      if(t>=secs)res();else requestAnimationFrame(f);
+    })();
+  });
+  rec.stop();await done;
+  recording=false;
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(chunks,{type:mime||'video/webm'}));
+  a.download='reel-'+secs+'s.'+ext;
+  document.body.appendChild(a);a.click();a.remove();
+  msg.textContent='Video download thai gayo ✔ ('+ext+')';
+  $('bar').style.display='none';btn.disabled=false;t0=performance.now();
+};
+
+preload().then(()=>requestAnimationFrame(loop));
+</script>
+</body>
+</html>
