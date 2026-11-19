@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZIP UNLOCK | Premium Access</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--purple:#a855f7;--cyan:#00eaff;--bg:#060610}
+body{
+ background:var(--bg);color:white;
+ font-family:'Space Grotesk',sans-serif;
+ min-height:100vh;overflow-x:hidden;
+}
+body:before{
+ content:"";position:fixed;inset:0;z-index:-2;
+ background:
+ radial-gradient(ellipse at 15% 20%,#7514b433,transparent 40%),
+ radial-gradient(ellipse at 85% 70%,#006aff22,transparent 40%),
+ linear-gradient(135deg,#070713,#09091b);
+}
+#particles{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.nav{
+ max-width:1100px;margin:auto;padding:25px 22px;
+ display:flex;justify-content:space-between;align-items:center;
+}
+.brand{font-family:Orbitron;font-size:17px;font-weight:900;letter-spacing:2px}
+.brand span{color:var(--cyan)}
+.status{font-size:11px;color:#00ffad;border:1px solid #00ffad55;padding:8px 13px;border-radius:30px}
+.hero{text-align:center;padding:55px 20px 35px}
+.eyebrow{
+ display:inline-block;padding:9px 16px;border:1px solid #a855f755;
+ border-radius:30px;color:#d7a5ff;font-size:11px;letter-spacing:2px;
+ background:#a855f710;animation:pulse 2s infinite;
+}
+@keyframes pulse{50%{box-shadow:0 0 25px #a855f755}}
+h1{
+ font-family:Orbitron;font-size:clamp(35px,8vw,68px);
+ line-height:1.2;margin:25px 0 16px;font-weight:900;
+ background:linear-gradient(90deg,#fff,#b66bff,#00eaff,#fff);
+ background-size:250%;background-clip:text;color:transparent;
+ -webkit-background-clip:text;
+ animation:gradient 5s linear infinite,appear 1s ease;
+}
+@keyframes gradient{to{background-position:250%}}
+@keyframes appear{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+.hero p{color:#9999b5;font-size:14px;line-height:1.8;max-width:440px;margin:auto}
+.visual{
+ height:210px;display:flex;justify-content:center;align-items:center;
+ perspective:800px;
+}
+.zip{
+ width:125px;height:145px;border:2px solid #a855f7;
+ border-radius:17px;background:linear-gradient(145deg,#301054,#100b26);
+ display:flex;flex-direction:column;justify-content:center;align-items:center;
+ box-shadow:0 0 35px #9b35ff55,inset 0 0 30px #a855f733;
+ transform:rotateY(-12deg) rotateX(8deg);
+ animation:float 3s ease-in-out infinite;
+ position:relative;
+}
+.zip:before{
+ content:"";position:absolute;inset:9px;border:1px dashed #c084fc66;border-radius:10px;
+}
+.zip-icon{font-size:55px;filter:drop-shadow(0 0 12px #b35aff)}
+.zip small{font-family:Orbitron;color:#d8a8ff;font-size:12px;letter-spacing:3px;margin-top:7px}
+@keyframes float{50%{transform:translateY(-15px) rotateY(12deg) rotateX(-5deg)}}
+.section{max-width:850px;margin:auto;padding:15px 20px}
+.offer{
+ background:linear-gradient(135deg,#17112d,#10182b);
+ border:1px solid #a855f766;border-radius:25px;
+ padding:28px 22px;text-align:center;
+ box-shadow:0 15px 60px #0008,0 0 35px #a855f718;
+ position:relative;overflow:hidden;
+}
+.offer:before{
+ content:"";position:absolute;width:220px;height:220px;
+ background:#a855f7;filter:blur(110px);opacity:.13;top:-100px;right:-70px;
+}
+.offer-label{color:#aaa;font-size:11px;letter-spacing:3px}
+.price{font-family:Orbitron;font-size:65px;font-weight:900;margin:10px 0}
+.price span{font-size:25px;color:var(--cyan)}
+.once{font-size:12px;color:#aaa}
+.unlimited{
+ display:inline-block;margin-top:15px;padding:9px 18px;
+ color:#00ffad;border:1px solid #00ffad66;border-radius:30px;
+ background:#00ffad0c;font-size:12px;font-weight:700;
+}
+.features{
+ display:grid;grid-template-columns:repeat(2,1fr);
+ gap:13px;margin:20px 0;
+}
+.feature{
+ background:#ffffff08;border:1px solid #ffffff12;
+ border-radius:15px;padding:17px 13px;text-align:left;
+ transition:.3s;
+}
+.feature:hover{transform:translateY(-5px);border-color:#a855f7}
+.feature .icon{font-size:24px;margin-bottom:9px}
+.feature b{display:block;font-size:13px}
+.feature small{display:block;color:#85859e;font-size:10px;margin-top:5px}
+.pay{
+ width:100%;padding:19px;border:0;border-radius:15px;
+ color:white;font-family:Orbitron;font-size:15px;font-weight:900;
+ letter-spacing:1px;cursor:pointer;
+ background:linear-gradient(100deg,#7418dc,#b34dff,#007dff);
+ background-size:200%;
+ box-shadow:0 0 30px #9b35ff55;
+ transition:.3s;position:relative;overflow:hidden;
+}
+.pay:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 0 45px #a855f799}
+.pay:active{transform:scale(.96)}
+.secure{font-size:11px;color:#888;margin-top:14px}
+.steps{display:flex;gap:12px;justify-content:center;margin:28px 0 40px}
+.step{font-size:11px;color:#999;text-align:center;flex:1}
+.step strong{display:block;color:#c58cff;font-size:19px;margin-bottom:5px}
+.footer{text-align:center;padding:25px;color:#555;font-size:10px;letter-spacing:2px;border-top:1px solid #ffffff0c}
+@media(min-width:700px){.hero{padding-top:75px}.section{padding-top:25px}.offer{padding:40px}}
+@media(max-width:380px){.features{grid-template-columns:1fr}.hero{padding-top:35px}}
+</style>
+</head>
+
+<body>
+<canvas id="particles"></canvas>
+
+<nav class="nav">
+ <div class="brand">ZIP<span>UNLOCK.</span></div>
+ <div class="status">● PREMIUM ACCESS</div>
+</nav>
+
+<header class="hero">
+ <div class="eyebrow">✦ EXCLUSIVE DIGITAL ACCESS ✦</div>
+ <h1>UNLOCK<br>THE POWER.</h1>
+ <p>One small payment. Your ZIP password access.
+Get started with a simple and easy process.</p>
+</header>
+
+<div class="visual">
+ <div class="zip">
+  <div class="zip-icon">📦</div>
+  <small>ZIP FILE</small>
+ </div>
+</div>
+
+<main class="section">
+ <div class="offer">
+  <div class="offer-label">ONE TIME ACCESS PRICE</div>
+  <div class="price"><span>₹</span>19</div>
+  <div class="once">Pay once • No recurring charge</div>
+  <div class="unlimited">♾ UNLIMITED USE</div>
+ </div>
+
+ <div class="features">
+  <div class="feature">
+   <div class="icon">🔐</div>
+   <b>ZIP Password</b>
+   <small>Get password access</small>
+  </div>
+  <div class="feature">
+   <div class="icon">♾️</div>
+   <b>Unlimited Use</b>
+   <small>Use without usage limits</small>
+  </div>
+  <div class="feature">
+   <div class="icon">⚡</div>
+   <b>Easy Process</b>
+   <small>Simple access flow</small>
+  </div>
+  <div class="feature">
+   <div class="icon">💎</div>
+   <b>One Time Pay</b>
+   <small>No subscription charge</small>
+  </div>
+ </div>
+
+ <button class="pay" onclick="payNow()">
+  <span>PAY ₹19 NOW &nbsp; →</span>
+ </button>
+
+ <div class="secure">🔒 You will be redirected to the payment page</div>
+
+ <div class="steps">
+  <div class="step"><strong>01</strong>Pay ₹19</div>
+  <div class="step"><strong>02</strong>Complete payment</div>
+  <div class="step"><strong>03</strong>Get access</div>
+ </div>
+</main>
+
+<footer class="footer">
+ ZIP UNLOCK • PREMIUM DIGITAL ACCESS
+</footer>
+
+<script>
+const PAYMENT_URL="https://drecopenal-gif.github.io/Approve-7/?id=pay_svvqvqdfj";
+
+function sound(){
+ if(navigator.vibrate) navigator.vibrate(55);
+ try{
+  const ctx=new(window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.type="sine";osc.frequency.value=650;
+  gain.gain.setValueAtTime(.09,ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.16);
+  osc.start();osc.stop(ctx.currentTime+.16);
+ }catch(e){}
+}
+
+function payNow(){
+ sound();
+ window.location.href=PAYMENT_URL;
+}
+
+// Animated background particles
+const canvas=document.getElementById("particles");
+const ctx=canvas.getContext("2d");
+let dots=[];
+
+function resize(){
+ canvas.width=innerWidth;
+ canvas.height=innerHeight;
+ dots=Array.from({length:55},()=>({
+  x:Math.random()*canvas.width,
+  y:Math.random()*canvas.height,
+  r:Math.random()*1.8+.4,
+  speed:Math.random()*.35+.1
+ }));
+}
+function animate(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ dots.forEach(d=>{
+  d.y-=d.speed;
+  if(d.y<0){d.y=canvas.height;d.x=Math.random()*canvas.width}
+  ctx.beginPath();
+  ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+  ctx.fillStyle="rgba(174,112,255,.65)";
+  ctx.fill();
+ });
+ requestAnimationFrame(animate);
+}
+addEventListener("resize",resize);
+resize();animate();
+</script>
+</body>
+</html>
